@@ -1,276 +1,334 @@
 {% extends "dashboard.html" %}
 
-{% block mozillian_interests %}
-<div class="two columns align-right">
-  <a href="#" class="small white button nice radius"
-      data-reveal-id="interests-modal">Edit interests</a>
-  {% if interestform.tracked_functional_areas.errors %}
-    <small class="error top-margined">
-      Please mark your interests.
-    </small>
-  {% endif %}
-</div>
-{% endblock %}
-
-
 {% block body_content %}
-{% if not tracked_interests %}
-  <div class="dashboard-box">
-    <div class="row">
-      <div class="twelve columns">
-        <p>
-          To track activities of Reps, click on "Edit interests" to select interests.
+
+<!-- NOTE: This 'for' is a hack to get displayable data for mocking up, an artifact of the 
+      prior tabbed design that repeated each block for each interest. In this version the page 
+      only shows a single interest at a time (or an aggregate of all). However, for mockup 
+      purposes this was the simplest way to populate some real sample data since none of the 
+      filters actually work yet. Track only one area of interest to see the page as it should be 
+      without repeating blocks.
+-->
+{% for key, reps in tracked_interests|dictsort %}
+
+  <form id="dashboard-filter" class="dashboard-filter-set custom">
+    <ul>
+      <li class="columns three">
+        <label for="activities-filter-people">Show activities for:</label>
+        <select id="activities-filter-people" name="people">
+          <!-- TODO: Filter to only show data for the people encompassed by the filter value. -->
+          <!-- TODO: Only include the 'my mentees' option for those who have one or more mentees. -->
+          <option value="all" selected>All reps</option>
+          <option value="mentees">My mentees</option>
+          <option value="mine">Myself</option>
+        </select>    
+      </li>
+      
+      <li class="columns three">
+        <label for="activities-filter-interests">In area:</label>
+        <select id="activities-filter-interests" name="interests">
+          <!-- TODO: Selecting All should display combined data from all tracked interests. This is the initial selection. -->
+          <option value="all" selected>All interests</option>
+        {% for key, reps in tracked_interests|dictsort %}
+          <option value="{{ key|replace(' ', '')|lower }}">
+            {{ key }}
+          </option>
+        {% endfor %}
+        </select>
+      </li>
+      
+      <li class="columns three end">
+        <label for="dashboard-filter-period">For period:</label>
+        <!-- TODO: Choosing 'current and future' should clear date range fields below (if they have any value). No date range means we show all activities that have not yet come to pass. -->
+        <!-- TODO: 'past month' and 'past 6 months' should automatically update the date range fields below with the correct dates. They're shortcuts for predefined date ranges. -->
+        <!-- TODO: Choosing 'custom' should reveal advanced options and set focus to the Date Start field. Changing back to another value should NOT hide the advanced options if they're visible; it's a one-time reveal. -->
+        <select id="dashboard-filter-period" name="period">
+          <option value="future">Current and Future</option>
+          <option value="past-month">Past month</option>
+          <option value="past-6months">Past 6 months</option>
+          <option value="custom">Custom</option>
+        </select>
+      </li>
+    </ul>
+
+    <div class="advanced-options">
+      <button type="button" title="Advanced options" class="adv-options-toggle block-toggle">Advanced options</button>
+
+      <fieldset class="adv-options-form">
+        <!-- TODO: Hook up the datepicker widget for date fields. -->
+        <!-- TODO: Entering a custom date range should automatically set the period filter above to 'custom' -->
+        <fieldset class="columns six">
+          <legend><span>Custom period:</span></legend>
+          <ol>
+            <li>
+              <label for="dashboard-filter-start">Start date</label>
+              <input type="date" class="datepicker input-text" id="dashboard-filter-start" name="dtstart">
+            </li>
+            <li>
+              <label for="dashboard-filter-end">End date</label>
+              <input type="date" class="datepicker input-text" id="dashboard-filter-end" name="dtend">
+            </li>
+          </ol>
+        </fieldset>
+      
+        <p class="columns three end">
+          <label for="dashboard-filter-country">In country:</label>
+          <select id="dashboard-filter-country">
+            <option value="all" selected>All countries</option>
+            <!-- Todo: Make list of countries available in this template. -->
+            <!-- Todo: When a country is selected, only show data for that country. -->
+            {% for country in countries %}
+              <option value="{{ country|lower }}">{{ country }}</option>
+            {% endfor %}
+          </select>
         </p>
+      </fieldset>
+    </div>
+    <button type="submit" class="invisible">Submit</button>
+  </form>
+  <!-- end dashboard filters -->
+
+
+  <!-- people block (not shown when viewing only yourself) -->
+  <div class="dashboard-box">
+    <h2 class="section-title">People</h2>
+
+    <div class="row">
+      <!-- people grid block -->
+        {% if reps %}
+          <ul class="avatar-grid">
+            {% for rep in reps %}
+              <li>
+                <a href="{{ url('profiles_view_profile', rep|get_display_name)}}" title="{{ rep.get_full_name() }}" class="has-tip tip-bottom">
+                  <img src="{{ rep|get_avatar_url(50) }}" class="avatar-grid-image" alt="{{ rep.get_full_name() }}">
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+          <div class="align-right">
+            <a href="#" data-reveal-id="mail-reps-modal" class="small white button nice radius">Email Reps</a>
+          </div>
+        {% else %}
+          <div class="row no-bugs">
+            <p>No Reps found with the specified interest!</p>
+          </div>
+        {% endif %}
       </div>
+      <!-- end people grid block -->
     </div>
   </div>
-{% else %}
-  <dl class="tabs top-margined">
-    {% for key, reps in tracked_interests|dictsort %}
-      <dd>
-        <a href="#{{ key|replace(" ", "") }}"
-           {% if loop.first %} class="active"{% endif %}>{{ key }}
-        </a>
-      </dd>
-    {% endfor %}
-  </dl>
-  <ul class="tabs-content">
-    {% for key, reps in tracked_interests|dictsort %}
-      <li {% if loop.first %}class="active"{% endif %} id="{{ key|replace(" ", "") }}Tab">
-      <!-- people block -->
-      <div class="dashboard-box">
-        <div class="row">
-          <div class="seven columns">
-            <h5>People</h5>
+  <!-- end people block -->
+
+
+  <!-- reports block -->
+  <section id="reports" class="dashboard-box">
+    <h2 class="section-title">Reports</h3>
+
+  {% if reps_reports[key] %}
+
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th scope="col" class="dashboard-clickable type-string">Name</th>
+          <th scope="col" class="dashboard-clickable type-string">Last Report</th>
+          <th scope="col" class="dashboard-clickable type-string">Reports Completed</th>
+          <th scope="col" class="dashboard-clickable type-string">Reports Completed <br> during time period</th>
+          <th scope="col" class="dashboard-clickable type-string">Events Attended</th>
+          <th scope="col" class="dashboard-clickable type-string">Events Attended<br> during time period</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reps_reports[key] %}
+          <tr>
+            <th scope="row">
+              <a href="{{ url('profiles_view_profile', report.user|get_display_name) }}">
+                 {{ report.user.get_full_name() }}
+              </a>
+            </th>
+            <td>
+              <a href="{{ report|get_report_view_url }}">
+                 {{ report.month.strftime('%B %Y') }}
+              </a>
+            </td>
+            <td>
+              <!-- Todo: Calculate report metrics for the Rep in this row: total reports, total number of overdue reports, total number of empty reports  -->
+              <span class="has-tip tip-right" title="22 reports (2 overdue, 1 empty)">93%</span>
+              <!-- Todo:  Determine if the most recent report is empty. If so, display flag icon. -->
+              <i class="pict-icon empty-report has-tip tip-right" title="Empty report">Empty report</i>
+              <!-- Todo: Determine if the most recent report was filed late. If so, display clock icon and include the date of report in a tool tip. -->
+              <i class="pict-icon late-report has-tip tip-right" title="Filed late on April 8, 2013">Filed late on April 8, 2013</i>
+            </td>
+          <!-- Todo: Calculate recent report metrics for the Rep in this row based on the selected time period: reports, number of overdue reports, number of empty reports  -->
+            <td><span class="has-tip tip-right" title="6 reports (0 overdue, 0 empty)">100%</span></td>
+          <!-- Todo: Calculate number of contribute signups at all events that this Rep has attended -->
+            <td><span class="has-tip tip-right" title="18 contribute signups">23</span></td>
+          <!-- Todo: Calculate number of contribute signups at events that this Rep has attended during the selected time period -->
+            <td><span class="has-tip tip-right" title="5 contribute signups">7</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  {% else %}
+
+    <div class="row no-bugs">
+    <!-- TODO: Customize the message for the filter. Eg, 'No reports found for [Interest]' or 'No reports found between [Start date] and [End date]' -->
+      <p>No reports found!</p>
+    </div>
+    
+  {% endif %}
+
+  </section>
+  <!-- end reports block -->
+
+  <!-- events block -->
+  <section class="dashboard-box">
+      <!-- TODO: Customize the title for the filter state. Eg, 'Current and upcoming events' or 'Past events' -->
+      <h2 class="section-title">Events</h2>
+
+      <!-- Event metrics block (Shown only for past events) -->
+      <div class="row">
+        <div class="twelve columns">
+          <div class="events-summary signups">
+            <!-- TODO: Calculate the number of contributor signups for the current filter state (people + interest + period + country) -->
+            <p><strong>28</strong> contributor signups</p>
           </div>
-          <div class="five columns">
-            <dl class="sub-nav dashboard-filter">
-              <dt>Filter:</dt>
-              <dd class="active">
-                <a class="dashboard-mozillians-reps-grid-button" href="javascript:void(0)">
-                   Reps Grid
-                </a>
-              </dd>
-              <dd>
-                <a class="dashboard-mozillians-reps-reports-button" href="javascript:void(0)">
-                   Reps Reports
-                </a>
-              </dd>
-            </dl>
+          <div class="events-summary attendees">
+            <!-- TODO: Calculate the number of average attendees at events for the current filter state (people + interest + period + country) -->
+            <p>
+              <strong>63</strong> attendees on average
+              <a href="#event-attendance-modal" data-reveal-id="event-attendance-modal" class="has-tip tip-right pict-icon bar-chart" title="View attendance chart">View attendance chart</a>
+            </p>
           </div>
         </div>
+      </div>
+      <!-- end Event metrics block -->
 
-        <div class="row">
-          <!-- people grid block -->
-          <div class="dashboard-mozillians-reps-grid-block">
-            {% if reps %}
-              <ul class="block-grid four-up">
-                {% for rep in reps %}
-                  <li>
-                    <a href="{{ url('profiles_view_profile', rep|get_display_name)}}">
-                      <div class="panel dashboard-mentee">
-                        <img src="{{ rep|get_avatar_url(50) }}"
-                             class="profiles-people-avatar"
-                             alt="avatar">
-                        <h6>{{ rep.get_full_name() }}</h6>
-                      </div>
-                    </a>
-                  </li>
+      <!-- Current and future events block -->
+      <div class="row">
+        <div class="dashboard-events-future-block">
+          {% if reps_current_events[key] %}
+            <table class="events dashboard-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="dashboard-clickable type-string event-name">Event Name</th>
+                  <th scope="col" class="dashboard-clickable type-string">Start Date</th>
+                  <th scope="col" class="dashboard-clickable type-string">End Date</th>
+                  <th scope="col" class="dashboard-clickable type-string">City</th>
+                  <th scope="col" class="dashboard-clickable type-string">Country</th>
+                  <th scope="col" class="dashboard-clickable type-string">Owner</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for event in reps_current_events[key] %}
+                  <tr>
+                    <td class="event-name">
+                      <!-- Todo: If the event has Budget or Swag requests, show the expander button -->
+                      <!-- Todo: Swap the expander button pictogram (rotate the arrow) when clicked -->
+                      <i class="pict-icon item-expand has-tip tip-right" title="View event requests"></i>
+                      <a class="event-url" href="{{ url('events_view_event', slug=event.slug) }}">
+                         {{ event.name }}
+                      </a>
+                      <!-- Todo: Check if an event has Budget or Swag requests.
+                           If so, include that information below. -->
+                      <table class="dashboard-event-details">
+                        <thead>
+                          <tr>
+                            <th scope="col">Bug</th>
+                            <th scope="col">Summary</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Whiteboard</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><a href="#">123456</a></td>
+                            <th scope="row">Budget request - Firefox OS hackathon</th>
+                            <td>ASSIGNED</td>
+                            <td>Approved</td>
+                          </tr>
+                          <tr>
+                            <td><a href="#">123457</a></td>
+                            <th scope="row">Swag request - Firefox OS hackathon</th>
+                            <td>ASSIGNED</td>
+                            <td>Order Shipped</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </th>
+                    <td>{{ event.start|format_datetime }}</td>
+                    <td>{{ event.end|format_datetime }}</td>
+                    <td>{{ event.city }}</td>
+                    <td>{{ event.country }}</td>
+                    <td>
+                      <a href="{{ url('profiles_view_profile', event.owner|get_display_name) }}">
+                         {{ event.owner.get_full_name() }}
+                      </a>
+                    </td>
+                  </tr>
                 {% endfor %}
-              </ul>
-              <div class="align-right">
-                <a href="#" data-reveal-id="mail-reps-modal"
-                   class="small white button nice radius">Email Reps</a>
-              </div>
-            {% else %}
-              <div class="row">
-                <div class="twelve columns no-bugs">
-                  <p>No Reps found with the specified interest!</p>
-                </div>
-              </div>
-            {% endif %}
-          </div>
-          <!-- end people grid block -->
-
-          <!-- reports list block -->
-          <div class="dashboard-mozillians-reps-reports-block hidden">
-            {% if reps_reports[key] %}
-              <table class="dashboard-table">
-                <thead>
-                  <tr>
-                    <th class="dashboard-clickable type-string">Fullname</th>
-                    <th class="dashboard-clickable type-int">Year</th>
-                    <th class="dashboard-clickable type-string">Month</th>
-                    <th class="dashboard-clickable type-string">Date filled</th>
-                    <th class="dashboard-clickable type-string align-center">Empty</th>
-                    <th class="dashboard-clickable type-string align-center">Overdue</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for report in reps_reports[key] %}
-                    <tr>
-                      <td>
-                        <a href="{{ url('profiles_view_profile',
-                                    report.user|get_display_name) }}">
-                           {{ report.user.get_full_name() }}
-                        </a>
-                      </td>
-                      <td>{{ report.month.strftime('%Y') }}</td>
-                      <td>
-                        <a href="{{ report|get_report_view_url }}">
-                           {{ report.month.strftime('%B') }}
-                        </a>
-                      </td>
-                      <td>{{ report.updated_on|format_datetime }}</td>
-                      <td class="dashboard-list-pictogram">
-                        {% if report.empty %}%{% endif %}
-                      </td>
-                      <td class="dashboard-list-pictogram">
-                        {% if report.overdue %}%{% endif %}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            {% else %}
-              <div class="row">
-                <div class="twelve columns no-bugs">
-                  <p>No Reports found!</p>
-                </div>
-              </div>
-            {% endif %}
-          </div>
-        <!-- end reports list block -->
+              </tbody>
+            </table>
+          {% else %}
+            <div class="row no-bugs">
+            <!-- TODO: Customize the message for the filter. Eg, 'No events found for [Interest]' or 'No events found between [Start date] and [End date]' -->
+              <p>No events found!</p>
+            </div>
+          {% endif %}
         </div>
       </div>
-      <!-- end people block -->
+      <!-- end Current and future events block -->
 
-      <!-- events block -->
-      <div class="dashboard-box">
-        <div class="row">
-          <div class="seven columns">
-            <h5>Events</h5>
+      <!-- Past events block-->
+      <div class="dashboard-events-past-block">
+        {% if reps_past_events[key] %}
+          <table class="events dashboard-table">
+            <thead>
+              <tr>
+                <th scope="col" class="dashboard-clickable type-string event-name">Event Name</th>
+                <th scope="col" class="dashboard-clickable type-string">Start Date</th>
+                <th scope="col" class="dashboard-clickable type-string">End Date</th>
+                <th scope="col" class="dashboard-clickable type-string">City</th>
+                <th scope="col" class="dashboard-clickable type-string">Country</th>
+                <th scope="col" class="dashboard-clickable type-string">Owner</th>
+                <th scope="col" class="dashboard-clickable type-int">Contribute Signups</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for event in reps_past_events[key] %}
+                <tr>
+                  <td class="event-name">
+                    <a class="event-url" href="{{ url('events_view_event', slug=event.slug) }}">
+                       {{ event.name }}
+                    </a>
+                  </td>
+                  <td>{{ event.start|format_datetime }}</td>
+                  <td>{{ event.end|format_datetime }}</td>
+                  <td>{{ event.city }}</td>
+                  <td>{{ event.country }}</td>
+                  <td>
+                    <a href="{{ url('profiles_view_profile', event.owner|get_display_name) }}">
+                       {{ event.owner.get_full_name() }}
+                    </a>
+                  </td>
+                  <td>{{ event.converted_visitors }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="row no-bugs">
+            <p>No events found!</p>
           </div>
-          <div class="five columns">
-            <dl class="sub-nav dashboard-filter">
-              <dt>Filter:</dt>
-                <dd class="active">
-                  <a class="dashboard-events-future-button" href="javascript:void(0)">
-                    Current & Future events
-                  </a>
-                </dd>
-                <dd>
-                  <a class="dashboard-events-past-button" href="javascript:void(0)">
-                    Past events
-                  </a>
-                </dd>
-            </dl>
-          </div>
-        </div>
-
-        <div class="row">
-          <!-- Current and future events block -->
-          <div class="dashboard-events-future-block">
-            {% if reps_current_events[key] %}
-              <table class="dashboard-table">
-                <thead>
-                  <tr>
-                    <th class="dashboard-clickable type-string">Event Name</th>
-                    <th class="dashboard-clickable type-string">Start Date</th>
-                    <th class="dashboard-clickable type-string">End Date</th>
-                    <th class="dashboard-clickable type-string">City</th>
-                    <th class="dashboard-clickable type-string align-center">Country</th>
-                    <th class="dashboard-clickable type-string align-center">Owner</th>
-                    <th class="dashboard-clickable type-int align-center">Contribute Signups</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for event in reps_current_events[key] %}
-                    <tr>
-                      <td>
-                        <a href="{{ url('events_view_event', slug=event.slug) }}">
-                           {{ event.name }}
-                        </a>
-                      </td>
-                      <td>{{ event.start|format_datetime }}</td>
-                      <td>{{ event.end|format_datetime }}</td>
-                      <td>{{ event.city }}</td>
-                      <td>{{ event.country }}</td>
-                      <td>
-                        <a href="{{ url('profiles_view_profile',
-                                        event.owner|get_display_name) }}">
-                           {{ event.owner.get_full_name() }}
-                        </a>
-                      </td>
-                      <td>{{ event.converted_visitors }}</td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            {% else %}
-              <div class="row">
-                <div class="twelve columns no-bugs">
-                  <p>No events found for the specified interest!</p>
-                </div>
-              </div>
-            {% endif %}
-          </div>
-          <!-- end Current and future events block -->
-
-          <!-- Past events block-->
-          <div class="dashboard-events-past-block hidden">
-            {% if reps_past_events[key] %}
-              <table class="dashboard-table">
-                <thead>
-                  <tr>
-                    <th class="dashboard-clickable type-string">Event Name</th>
-                    <th class="dashboard-clickable type-string">Start Date</th>
-                    <th class="dashboard-clickable type-string">End Date</th>
-                    <th class="dashboard-clickable type-string">City</th>
-                    <th class="dashboard-clickable type-string align-center">Country</th>
-                    <th class="dashboard-clickable type-string align-center">Owner</th>
-                    <th class="dashboard-clickable type-int align-center">Contribute Signups</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for event in reps_past_events[key] %}
-                    <tr>
-                      <td>
-                        <a href="{{ url('events_view_event', slug=event.slug) }}">
-                           {{ event.name }}
-                        </a>
-                      </td>
-                      <td>{{ event.start|format_datetime }}</td>
-                      <td>{{ event.end|format_datetime }}</td>
-                      <td>{{ event.city }}</td>
-                      <td>{{ event.country }}</td>
-                      <td>
-                        <a href="{{ url('profiles_view_profile',
-                                        event.owner|get_display_name) }}">
-                           {{ event.owner.get_full_name() }}
-                        </a>
-                      </td>
-                      <td>{{ event.converted_visitors }}</td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            {% else %}
-              <div class="row">
-                <div class="twelve columns no-bugs">
-                  <p>No events found for the specified interest!</p>
-                </div>
-              </div>
-            {% endif %}
-          </div>
-          <!-- end Past events block -->
-        </div>
-        <!-- end events block -->
+        {% endif %}
       </div>
-    </li>
-    {% endfor %}
-  </ul>
-{% endif %}
+      <!-- end Past events block -->
+
+    </section>
+    <!-- end events block -->
+
+  {% endfor %}<!-- end hack -->
+
 {% endblock %}
 
 {% block modals %}
@@ -279,7 +337,7 @@
   <div id="mail-reps-modal" class="reveal-modal">
     <a class="close-reveal-modal">&#215;</a>
     <p class="lead">Email Reps</p>
-    <h6>Comming soon!</h6>
+    <h6>Coming soon!</h6>
     <form id="email-mentees-form" method="post"
           action="{{ url('email_mentees') }}" class="custom">
       {{ csrf() }}
@@ -287,47 +345,83 @@
         {{field}} {{ field.label }}
         <br>
       {% endfor %}
-
-      </div>
     </form>
   </div>
 {% endif %}
 <!-- mail reps reveal modal end -->
 
-<!-- interests modal -->
-<form class="custom" method="post"
-      action="{{ url('dashboard') }}">
-  {{ csrf() }}
-  <div id="interests-modal" class="reveal-modal">
-    <a class="close-reveal-modal">&#215;</a>
-    <p class="lead">
-      Specify your interests in Functional areas you want to track
-    </p>
-    <h3>
-      Functional Areas
-    </h3>
-    <ul class="block-grid three-up">
-      {% for choice in interestform.tracked_functional_areas.field.choices %}
-        <li>
-        <label for="{{ choice.1 }}-bit">
-          <input type="checkbox" name="tracked_functional_areas"
-                 value="{{ choice.0 }}"
-            {% if choice.0 in interestform.tracked_functional_areas.value() %}
-              checked="checked"
-            {% endif %}/>
-          {{ choice.1 }}
-        </li>
-      {% endfor %}
-    </ul>
-    <button type="submit"
-            class="small green button nice radius close-reveal-modal">
-      choose these areas &raquo;
-    </button>
-    </a>
-  </div>
-</form>
-<!-- interests modal end -->
-{% endblock %}  
+
+<!-- event attendance reveal modal -->
+<div id="event-attendance-modal" class="reveal-modal">
+  <a class="close-reveal-modal">&#215;</a>
+  <!-- TODO: Customize title for the selected interest, or "All" if all are being shown. -->
+  <h3 class="lead">Attendance at Apps events</h3>
+
+  <div class="chart" id="chart-events"></div>
+
+  <!-- 
+    TODO: This table is malformed and the data doesn't lend itself to graphing. 
+    Right now the chart is unreadable because the table is unreadable. 
+    We need to structure this table properly to produce a readable chart. 
+    Of course we'll also need to fill it with actual data; this is just a static mockup. 
+    -->
+  <table class="dashboard-table chart-table">
+    <thead>
+      <tr>
+        <th scope="col">Attendance</th>
+        <th scope="col">Number of events</th>
+        <th scope="col">Percentage of events</th>
+        <th scope="col">Number of contribute signups</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">1-10</th>
+        <td>3</td>
+        <td>17%</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <th scope="row">11-50</th>
+        <td>4</td>
+        <td>22%</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <th scope="row">51-100</th>
+        <td>8</td>
+        <td>44%</td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <th scope="row">101-500</th>
+        <td>2</td>
+        <td>11%</td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <th scope="row">501-1000</th>
+        <td>0</td>
+        <td>0%</td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <th scope="row">1001+</th>
+        <td>1</td>
+        <td>6%</td>
+        <td>05</td>
+      </tr>
+      <tr>
+        <th scope="row">Total</th>
+        <td>18</td>
+        <td>100%</td>
+        <td>21</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
 
 {% block bottomextra %}
   {{ js('base_dashboard_mozillians') }}

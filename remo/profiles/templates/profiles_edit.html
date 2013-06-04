@@ -468,12 +468,14 @@
     <ul class="block-grid three-up">
       {% for choice in profileform.functional_areas.field.choices %}
         <li>
-          <label for="{{ choice.1 }}-bit">
-            <input type="checkbox" name="functional_areas" value="{{ choice.0 }}"
-                   {% if choice.0 in profileform.functional_areas.value() %}
-                     checked="checked"
-                   {% endif %}/>
+          <label for="{{ choice.1|replace(' ', '-')|lower }}-bit">
+            <input type="checkbox" name="functional_areas" id="{{ choice.1|replace(' ', '-')|lower }}-bit"
+                value="{{ choice.0 }}" 
+                {% if choice.0 in profileform.functional_areas.value() %}
+                  checked="checked"
+                {% endif %}/>
             {{ choice.1 }}
+          </label>
         </li>
       {% endfor %}
     </ul>

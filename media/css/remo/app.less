@@ -1,14 +1,13 @@
 /* --------------------
     Imports
 -------------------- */
-
 @import "fonts.less";
+@import "visualize.less";
 
 
 /* --------------------
     Generic Mixins
 -------------------- */
-
 .top-margined {
     margin-top: 20px !important;
 }
@@ -26,8 +25,7 @@
 }
 
 .pictogram {
-    .top-margined;
-    text-align:center;
+    text-align: center;
     font-family: "ModernPictogramsNormal";
     font-size: 30px;
     color: #aaa;
@@ -35,21 +33,29 @@
 }
 
 .opensans {
-    font-family: 'Open Sans';
+    font-family: 'Open Sans', sans-serif;
 }
 
 .opensanslight {
-    font-family: 'Open Sans Light';
+    font-family: 'Open Sans Light', sans-serif;
 }
 
 .metabold {
     font-family: 'MetaBold' !important;
 }
 
+.invisible {
+    position: absolute !important;
+    height: 1px; 
+    width: 1px; 
+    overflow: hidden;
+    clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+    clip: rect(1px, 1px, 1px, 1px);
+}
+
 /* -----------------------------------------
    Shared Styles
 ----------------------------------------- */
-
 html {
     border-top: 2px solid white;
 }
@@ -68,9 +74,6 @@ hr {
     margin: 5px 0 18px;
 }
 
-p {
-    .opensanslight;
-}
 
 a {
     color: rgb(41, 131, 200);
@@ -88,10 +91,11 @@ a:hover, a:active{
     -webkit-transition:color .3s ease-out;
     transition:color .3s ease-out;
     color: rgb(32, 103, 158);
+    text-decoration: underline;
 }
 
 h1, h2, h3, h4, h5, h6, .huge, .large {
-    font-family: 'Open Sans Light',sans-serif;
+    .opensanslight;
     display: block;
     font-weight: 300;
     margin: 0px 0px 12px;
@@ -117,19 +121,34 @@ h1, .huge h2, .large h2, .billboard h2 {
     letter-spacing: -2px;
 }
 
-h2 {
+h2, .page-title {
     font-size: 32px;
     letter-spacing: -1px;
 }
 
-h3 {
+h3, .dashboard-box h2 {
     font-size: 28px;
     letter-spacing: -0.5px;
 }
 
-h4 {
+h4, .section-title {
     font-size: 24px;
     letter-spacing: -0.25px;
+}
+
+.dashboard-box h3 {
+    font-size: 18px;
+    letter-spacing: normal;
+}
+
+dl.faq > dt {
+    .opensanslight;
+    font-size: 16px;
+    margin: 0 0 .25em;
+}
+ 
+dl.faq > dd {
+    margin-bottom: 1.5em;
 }
 
 .required-field {
@@ -232,6 +251,11 @@ textarea {
 /* -----------------------------------------
    Header Styles
 ----------------------------------------- */
+#masthead {
+    border-bottom: 1px solid #ddd;
+    padding: 0 0 8px;
+    margin: 0 auto 20px;  
+}
 
 #login-box {
     text-align: right;
@@ -337,7 +361,6 @@ li.last {
 /* -----------------------------------------
    Main Page Styles
 ----------------------------------------- */
-
 .main-section {
     margin-bottom: 40px;
 }
@@ -371,7 +394,6 @@ ul.orbit-bullets li {
 /* -----------------------------------------
    People Page Styles
 ----------------------------------------- */
-
 #profiles-view-avatar, #profiles-edit-avatar {
     width: 128px;
 }
@@ -501,7 +523,6 @@ ul.orbit-bullets li {
 /* -----------------------------------------
    View Profile Styles
 ----------------------------------------- */
-
 .profile-item {
     .top-margined;
 }
@@ -527,7 +548,6 @@ ul.orbit-bullets li {
 /* -----------------------------------------
    Edit Profile Styles
 ----------------------------------------- */
-
 .custom.dropdown ul {
     max-height: 150px;
     overflow-y: auto;
@@ -571,7 +591,7 @@ input.input-text {
 }
 
 .custom.dropdown {
-    margin-bottom: 20px !important;
+//    margin-bottom: 20px !important;
 }
 
 .custom.dropdown > a {
@@ -593,7 +613,6 @@ input.input-text {
 /* -----------------------------------------
    Point Map Styles
 ----------------------------------------- */
-
 .use-these {
     margin-top: 50px;
     text-align: right;
@@ -614,7 +633,6 @@ input.input-text {
 /* -----------------------------------------
    Delete Profile Styles
 ----------------------------------------- */
-
 .large.button.close-reveal-modal {
     font-size: 18px;
     line-height: 1;
@@ -630,7 +648,6 @@ input.input-text {
 /* -----------------------------------------
    Footer Styles
 ----------------------------------------- */
-
 #colophon {
     color: #bbb;
     padding: 48px 0;
@@ -663,7 +680,6 @@ input.input-text {
 /* -----------------------------------------
    Error Styles
 ----------------------------------------- */
-
 small.error {
     margin: -20px 0px 20px 4px;
 }
@@ -671,7 +687,6 @@ small.error {
 /* -----------------------------------------
    Pictogram Styles
 ----------------------------------------- */
-
 .pictogram-button {
     .pictogram;
     color: #ccc;
@@ -695,10 +710,100 @@ small.error {
     }
 }
 
+.pict-icon {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 0;
+  padding-top: 18px;
+  margin: 0 0 -.15em 3px;
+  overflow: hidden;
+  font-style: normal;
+  font-weight: normal;
+  border: 0;
+  background: transparent;
+}
+.pict-icon:after {
+  .pictogram;
+  font-size: 20px;
+  line-height: 15px;
+  white-space: nowrap;
+  text-indent: 0;
+  text-align: center;
+  display: block;
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.pict-icon.empty-report:after {
+  content: "B";
+}
+.pict-icon.late-report:after {
+  content: "}"
+}
+.pict-icon.bar-chart:after {
+  content: "7";
+}
+.pict-icon.item-expand:after {
+  content: ">";
+  font-size: 22px;
+}
+.pict-icon.item-expand.open:after {
+  content: "/";
+}
+
+.tooltip.pict-icon {
+  position: absolute;
+  width: auto;
+  height: auto;
+  text-indent: 0;
+  overflow: visible;
+  margin: -5px 0 0;
+  display: inline;
+}
+.tooltip.pict-icon:after {
+  content: "" !important;
+}
+
+// Open/Close toggle button
+.block-toggle {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  width: 22px;
+  height: 0;
+  padding-top: 22px;
+  border: 0;
+  background: transparent none;
+}
+.block-toggle:after {
+    content: "";
+    display: block;
+    width: 22px;
+    height: 22px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: url(/media/img/remo/icn-openclose.png) 0 0 no-repeat;
+}
+.block-toggle:hover:after,
+.block-toggle:focus:after {
+    background-position: 0 -50px;
+}
+ 
+.block-toggle.open:after {
+    background-position: 0 -100px;
+}
+.block-toggle.open:hover:after,
+.block-toggle.open:focus:after {
+    background-position: 0 -150px;
+}
+
 /* -----------------------------------------
    Planet feed Styles
 ----------------------------------------- */
-
 .ItemTitle {
     font-weight:bold;
     margin:20px 0px 0px 0px;
@@ -707,7 +812,6 @@ small.error {
 /* -----------------------------------------
    Logo Gray Styles
 ----------------------------------------- */
-
 #gray-logo {
     .top-margined;
     text-align: center;
@@ -726,7 +830,6 @@ small.error {
 /* -----------------------------------------
    Featured reps Styles
 ----------------------------------------- */
-
 #featured-articles {
     width: 100%;
 }
@@ -755,7 +858,6 @@ select#id_user {
 /* -----------------------------------------
    About page Styles
 ----------------------------------------- */
-
 #about-text ul {
     list-style-type: circle !important;
     list-style-position: inside;
@@ -777,7 +879,6 @@ select#id_user {
 /* -----------------------------------------
    Dashboard Styles
 ----------------------------------------- */
-
 .dashboard-action {
     margin: 5px 0px 20px 0px;
 }
@@ -788,14 +889,7 @@ select#id_user {
 
 .dashboard-table {
     width: 100%;
-}
-
-.dashboard-filter {
-    float: right;
-}
-
-.dashboard-box {
-    .top-margined;
+    margin: 0 0 20px;
 }
 
 dl.sub-nav dd.active a {
@@ -813,6 +907,7 @@ dl.sub-nav {
     .grayed;
     margin-bottom: 5px;
     text-align: center;
+    font-size: 13px;
 }
 
 .dashboard-mentee {
@@ -847,6 +942,10 @@ dl.sub-nav {
     }
 }
 
+.dashboard-report-icon {
+    margin-left: 8px;
+}
+
 div.overflow-fix-outer {
     position: relative;
     width: 300px;
@@ -860,10 +959,169 @@ div.overflow-fix-inner {
     width: 100%;
 }
 
+.advanced-options {
+  clear: both;
+  position: relative;
+  margin: 5px 0 0;
+  .adv-options-toggle {
+    position: absolute;
+    right: 3px;
+    top: -35px;
+  }
+}
+
+.dashboard-filter-set {
+  clear: both;
+  padding: 10px 15px;
+  margin: 0 0 20px;
+  background: #f3f3f3;
+  background: rgba(0,0,0,.02);
+  border-radius: 5px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+  .dropdown {
+    background: #f9f9f9;
+    margin-bottom: 0 !important;
+  }
+}
+
+.adv-options-form {
+  clear: both;
+  padding: 10px 15px;
+  margin: 0;
+  background: #f3f3f3;
+  background: rgba(0,0,0,.02);
+  border-radius: 5px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+  fieldset {
+    padding: 9px 0 0;
+    legend span {
+      font-size: 13px;
+    }
+    ol {
+      list-style: none;
+      margin: 0;
+    }
+    li {
+      width: 48%;
+      margin: 0 2% 0 0;
+      float: left;
+    }
+    input {
+      width: 10em;
+      display: inline;
+    }
+    label {
+      display: inline;
+    }
+  }
+}
+.adv-options-form:after {
+  content: "";
+  display: block;
+  clear: both;
+  height: 0;
+  visibility: hidden;
+}
+
+@media only screen and (max-width: 767px) {
+  .advanced-options {
+      margin-top: 35px;
+      .adv-options-toggle {
+          position: absolute;
+          right: 3px;
+          top: -25px;
+      }
+  }
+  .adv-options-form fieldset li {
+      margin-bottom: 20px;
+  }
+}
+
+
+.events-summary {
+    float: left;
+    margin-right: 4.4%;
+    font-weight: bold;
+    font-size: 16px;
+    strong {
+        font-size: 24px;
+    }
+    .pict-icon.bar-chart {
+        width: 22px;
+        padding-top: 22px;
+        margin-bottom: -.15em;
+    }
+    .pict-icon.bar-chart:after {
+        font-size: 30px;
+        width: 22px;
+        height: 22px;
+    }
+}
+
+table.chart-table {
+    position: absolute;
+    left: -999em;
+    width: 400px;
+}
+
+table.events {
+    .event-name {
+        width: 50%;
+        padding-left: 30px;
+        .item-expand {
+            float: left;
+            margin-left: -20px;
+        }
+    }
+    .event-url {
+        font-weight: bold;
+    }
+}
+
+table.dashboard-event-details {
+    width: 100%;
+    border: 0;
+    margin: 5px -4px 0;
+    background: transparent !important;
+    tr {
+        background: transparent;
+    }
+    th, td {
+        font-size: 11px;
+        font-weight: normal;
+        padding: 2px 4px;
+        background: transparent;
+        border-top: 1px solid #eee;
+    }
+    thead {
+        background: transparent;
+    }
+    thead th,
+    thead td {
+        font-weight: bold;
+    }
+    tbody th,
+    tbody td {
+        font-size: 11px;
+    }
+}
+
+.avatar-grid {
+    list-style: none;
+    margin: 0 0 20px;
+    li {
+        display: inline-block;
+        margin: 0 8px 8px 0;
+    }
+    .avatar-grid-image {
+        padding: 1px;
+        border: 1px solid #ddd;
+    }
+}
+
 /* -----------------------------------------
    Reports Styles
 ----------------------------------------- */
-
 ul.mreports {
     display: block;
     background: #f4f4f4;
@@ -985,7 +1243,6 @@ ul.mreports li.editable a {
 /* -----------------------------------------
    Event Styles
 ----------------------------------------- */
-
 .event-single-map-link {
     margin-top: 50px !important;
 }
@@ -1089,7 +1346,6 @@ ul.mreports li.editable a {
 }
 
 //Fixes for mobile
-
 @media only screen and (max-width: 767px) {
     .event-single-date-day-first {
         margin-top: 4px !important;
@@ -1357,9 +1613,9 @@ form.custom#events-searchform div.custom.dropdown {
     margin-top: 16px;
 }
 
-.events-edit-date div.custom.dropdown, .voting-edit-date div.custom.dropdown {
+.events-edit-date div.custom.dropdown, 
+.voting-edit-date div.custom.dropdown {
   width:101% !important;
-
   ul{
     width:100% !important;
   }
@@ -1392,6 +1648,11 @@ input.datepicker {
 @media only screen and (max-width: 767px) {
     input.datepicker {
         .top-margined;
+    }
+    .dashboard-filter-set {
+        input.datepicker {
+            margin-top: 0 !important;
+        }
     }
 }
 
@@ -1459,7 +1720,6 @@ input.datepicker {
 /* -----------------------------------------
    Labs Page Styles
 ----------------------------------------- */
-
 .labs-pic {
     border-radius: 5px;
     moz-border-radius: 5px;
@@ -1468,7 +1728,6 @@ input.datepicker {
 /* -----------------------------------------
    Voting
 ----------------------------------------- */
-
 .poll-block {
     display: block;
     padding: 0px 20px 10px 20px;

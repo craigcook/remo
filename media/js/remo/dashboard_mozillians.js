@@ -1,39 +1,44 @@
-$(document).ready(function () {
-    $('.dashboard-mozillians-reps-grid-button').click(function () {
-        $('.dashboard-mozillians-reps-grid-block').removeClass('hidden');
-        $('.dashboard-mozillians-reps-reports-block').addClass('hidden');
+(function() {
+    "use strict";
 
-        $('.dashboard-mozillians-reps-grid-button').parent().addClass('active');
-        $('.dashboard-mozillians-reps-grid-button').parent().siblings().removeClass('active');
+    $('.adv-options-form, .dashboard-event-details').hide();
+
+    // Advanced toggle click.
+    $('.adv-options-toggle').click(function() {
+        $(this).siblings('.adv-options-form').slideToggle('fast', function(){
+          $(this).siblings('.adv-options-toggle').toggleClass('open', $(this).is(':visible'));
+        });
     });
 
-    $('.dashboard-mozillians-reps-reports-button').click(function () {
-        $('.dashboard-mozillians-reps-reports-block').removeClass('hidden');
-        $('.dashboard-mozillians-reps-grid-block').addClass('hidden');
-
-        $('.dashboard-mozillians-reps-reports-button').parent().addClass('active');
-        $('.dashboard-mozillians-reps-reports-button').parent().siblings().removeClass('active');
+    // Events expander button click.
+    $('.event-name .item-expand').click(function() {
+        $(this).siblings('.dashboard-event-details').slideToggle('fast', function(){
+          $(this).siblings('.item-expand').toggleClass('open', $(this).is(':visible'));
+        });
     });
-
-    $('.dashboard-events-future-button').click(function () {
-        $('.dashboard-events-future-block').removeClass('hidden');
-        $('.dashboard-events-past-block').addClass('hidden');
-
-        $('.dashboard-events-future-button').parent().addClass('active');
-        $('.dashboard-events-future-button').parent().siblings().removeClass('active');
-    });
-
-    $('.dashboard-events-past-button').click(function () {
-        $('.dashboard-events-past-block').removeClass('hidden');
-        $('.dashboard-events-future-block').addClass('hidden');
-
-        $('.dashboard-events-past-button').parent().addClass('active');
-        $('.dashboard-events-past-button').parent().siblings().removeClass('active');
-    });
-
-
 
     $('table').each(function(index, item) { $(item).stupidtable(); });
     // Apply prettyDate on all elements with data-time attribute.
     $('*').find('*[data-time]').prettyDate({attribute:'data-time', interval: 60000, isUTC:true});
-});
+
+    // Render charts from tables
+    // @Requires: jquery.visualize.js
+    $('table.chart-table').visualize({
+      type: 'area',
+      width: '500px',
+      appendKey: 'true',
+      colors: [
+        '#bf0c3f',
+        '#e97d0a',
+        '#096b8b',
+        '#51b009',
+        '#684dac',
+        '#eac90f',
+        '#28adfa',
+        '#f45a90',
+        '#7b1b48']
+    })
+    .appendTo($(this).parents('.reveal-modal').find('div.chart'))
+    .trigger('visualizeRefresh');
+
+})();

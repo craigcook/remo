@@ -47,7 +47,7 @@
 	}
 	/* HTML5 display-role reset for older browsers */
 	article, aside, details, figcaption, figure,
-	footer, header, hgroup, menu, nav, section {
+	footer, header, hgroup, menu, nav, section, main {
 		display: block;
 	}
 	body {
@@ -104,21 +104,16 @@
 	-------------------------------------------------- */
 	table { background: #fff; -moz-border-radius: 3px; -webkit-border-radius: 3px; border-radius: 3px; margin: 0 0 18px; border: 1px solid #ddd;  }
 
-	table thead, table tfoot { background: #f5f5f5; }
-	table thead tr th,
-	table tfoot tr th,
-	table tbody tr td,
-	table tr td,
-	table tfoot tr td { font-size: 12px; line-height: 18px; text-align: left; }
-	table thead tr th,
-	table tfoot tr td { padding: 8px 10px 9px; font-size: 14px; font-weight: bold; color: #222; }
-	table thead tr th:first-child, table tfoot tr td:first-child { border-left: none; }
-	table thead tr th:last-child, table tfoot tr td:last-child { border-right: none; }
-
-	table tbody tr.even,
-	table tbody tr.alt { background: #f9f9f9; }
-	table tbody tr:nth-child(even) { background: #f9f9f9; }
-	table tbody tr td { color: #333; padding: 9px 10px; vertical-align: top; border: none; }
+  thead, tfoot { background: #f5f5f5; }
+	td, th { font-size: 12px; line-height: 1.5; text-align: left; }
+	thead th, tfoot td { padding: 8px 10px 9px; font-size: 14px; font-weight: bold; color: #222; }
+	thead th:first-child, tfoot td:first-child { border-left: none; }
+	thead th:last-child, tfoot td:last-child { border-right: none; }
+ 
+	tbody tr.even, tbody tr.alt { background: #f9f9f9; }
+	tbody tr:nth-child(even) { background: #f9f9f9; }
+	tbody td, tbody th { color: #333; padding: 9px 10px; vertical-align: top; border: none; }
+	tbody th { font-weight: bold; }
 
 /* --------------------------------------------------
 	:: Misc
@@ -504,8 +499,8 @@
     dl.tabs dt { display: block; width: auto; height: 30px; padding: 0 9px 0 20px; line-height: 30px; float: left; color: #999; font-size: 11px; text-transform: uppercase; cursor: default; }
     dl.tabs dt:first-child { padding: 0 9px 0 0; }
     dl.tabs dd { display: block; width: auto; height: 30px; padding: 0; float: left; }
-    dl.tabs dd a { display: block; width: auto; height: 29px; padding: 0 9px; line-height: 30px; border: solid 1px #ddd; margin: 0 -1px 0 0; color: #555; background: #eee; }
-    dl.tabs dd a.active { background: #fff; border-width: 1px 1px 0 1px; height: 30px; }
+    dl.tabs dd a { display: block; width: auto; height: 29px; padding: 0 9px; line-height: 30px; border: solid 1px #ddd; margin: 0 -1px 0 0; color: #555; background: #f9f9f9; }
+    dl.tabs dd a.active { background: #ddd; border-width: 1px 1px 0 1px; height: 30px; }
 
 		.nice.tabs { border-bottom: solid 1px #eee; margin: 0 0 30px 0; height:43px; }
 		.nice.tabs dd a { padding: 7px 18px 9px; font-size: 15px; font-size: 1.5rem; color: #555555; background: none; border: none; }
@@ -671,7 +666,8 @@
 	  border-bottom: dotted 1px #0593dc;
 	  color: #0192dd;
 	}
-	.tooltip {
+	.tooltip,
+	.tooltip.pict-icon {
     display: none;
 	  background: rgb(0,0,0);
 	  background: rgba(0,0,0,0.8);
@@ -680,7 +676,8 @@
 	  font-weight: bold;
 	  font-size: 12px;
 	  font-size: 1.2rem;
-	  padding: 5px;
+	  padding: 5px 10px;
+	  margin-top: -5px;
 	  z-index: 999;
 	  -webkit-border-radius: 4px;
 	  -moz-border-radius: 4px;
@@ -784,7 +781,7 @@
     	textarea.locked.expand 	{ max-width: 100%; }
 
 	/* Fieldsets */
-	form fieldset { padding: 9px 9px 2px 9px; border: solid 1px #ddd; margin: 18px 0; }
+	form fieldset { padding: 0; border: 0; margin: 0; }
 
 	/* Inlined Radio & Checkbox */
 	.form-field input[type=radio], div.form-field input[type=checkbox] { display: inline; width:auto; margin-bottom:0; }
@@ -837,13 +834,13 @@
 	form.custom span.custom.radio.checked { background-position: 0 -14px; }
 	form.custom span.custom.checkbox.checked { background-position: 0 -28px; }
 
-	form.custom div.custom.dropdown { display: block; position: relative; width: auto; height: 28px; margin-bottom: 9px; margin-top: 2px; }
+	form.custom div.custom.dropdown { display: block; position: relative; width: 100% !important; height: 28px; margin-bottom: 9px; margin-top: 2px; }
 	form.custom div.custom.dropdown a.current { display: block; width: auto; line-height: 26px; min-height: 26px; padding: 0 38px 0 6px; border: solid 1px #ddd; color: #141414; background-color: #fff; word-wrap: nowrap; }
 	form.custom div.custom.dropdown a.selector { position: absolute; width: 26px; height: 26px; display: block; background: url(/media/img/foundation/misc/custom-form-sprites.png) -14px 1px no-repeat; right: 0; top: 0; border: solid 1px #ddd; }
 	form.custom div.custom.dropdown:hover a.selector,
 	form.custom div.custom.dropdown.open a.selector { background-position: -14px -26px; }
 
-	form.custom div.custom.dropdown ul { position: absolute; width: auto; display: none; margin: 0; left: 0; top: 27px; margin: 0; padding: 0; background: #fff; background: rgba(255,255,255,0.95); border: solid 1px #ddd; }
+	form.custom div.custom.dropdown ul { position: absolute; width: 100% !important; display: none; margin: 0; left: 0; top: 27px; margin: 0; padding: 0; background: #fff; background: rgba(255,255,255,0.95); border: solid 1px #ddd; }
 	form.custom div.custom.dropdown ul li { cursor: pointer; padding: 3px 38px 3px 6px; min-height: 18px; margin: 0; white-space: nowrap}
 	form.custom div.custom.dropdown ul li.selected { background: url(/media/img/foundation/misc/custom-form-sprites.png) right -52px no-repeat; }
 	form.custom div.custom.dropdown ul li:hover { background-color: #2a85e8; color: #fff; }

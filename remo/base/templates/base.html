@@ -55,7 +55,7 @@
     <div class="container">
 
       <!-- Header -->
-      <header class="row">
+      <header id="masthead" class="row">
         <div class="twelve columns">
 
           <!-- Sign In & Mozilla Tab -->
@@ -82,7 +82,7 @@
                   {% else %}
                     <div class="hide-on-phones">
                       {% if user_is_rep(user) %}
-                        <a id="base-displayname" href="{{ url('profiles_view_my_profile') }}">
+                        <a class="base-displayname" href="{{ url('profiles_view_my_profile') }}">
                           {{ user.get_full_name()|default('user.userprofile.display_name') }}
                         </a>
                       {% else %}
@@ -93,7 +93,7 @@
                     </div>
                     <div class="show-on-phones">
                       {% if user_is_rep(user) %}
-                        <a id="base-displayname" href="{{ url('profiles_view_my_profile') }}">
+                        <a class="base-displayname" href="{{ url('profiles_view_my_profile') }}">
                           {{ user.get_full_name()|default('user.userprofile.display_name') }}
                         </a>
                       {% else %}
@@ -194,11 +194,6 @@
           </div>
         </div>
       </header>
-
-      <!-- Separator -->
-      <div class="row">
-        <hr>
-      </div>
 
       <!-- Page Content -->
       {% if messages %}
